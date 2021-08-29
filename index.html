@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<!-- Author: Andy Cox V
+Date: 28/8/2021
+Language: HTML & Javascript
+Description: Small website to provide Corps recruiting with acheivement bars to be displayed on outfit webpages in Cadets (wordpress). -->
+
+<html lang="en">
+	<head>
+	<meta charset="ANSI">
+	<title>Achievement Bar Creator</title>
+		<script type="text/javascript">
+			var bars = []; // Stores raw progress bar html data.
+			var titles = []; // Stores titles, used for simpler search techniques than bars[i].split('"')[1].
+			
+			function updatePreviewFrame() // Update preview frame contents.
+			{
+				let previewFrame = document.getElementById("previewWindow").contentWindow.document;
+				previewFrame.open();
+				previewFrame.write(bars.join("")); // Add all bars.
+				previewFrame.close();
+			}
+			
+			function submit() // Submit progress bar data.
+			{
+				// Get data from input.
+				let textInput = document.getElementById("attrText").value;
+				let valueInput = document.getElementById("attrValue").value;
+				
+				// Check if input is valid.
+				if(valueInput < 0 || valueInput > 10 || textInput === "")
+				{
+					alert("Invalid input for value or empty attribute name!\nNumbers must range from [0-10].\nAttribute name must not be empty.");
+					return;
+				}
+				
+				// Check if title exists.
+				for(let i = 0 ; i < titles.length ; i++)
+				{
+					if(titles[i] === textInput)
+					{
+						alert("Title name already exists!");
+						return;
+					}
+				}
+				
+				titles.push(textInput);
+				
+				// Add and create progress bar.
+				let progLabel = "bar" + textInput + valueInput; // Name for progress bar.
+				bars.push('<label for="' + progLabel + '">' + textInput + ' (' + valueInput + '/10)</label>' +
+				'\n<progress id="' + progLabel + '" value="' + valueInput + '" max="10"></progress>' +
+				'\n<br>\n'); // Add label to bars.
+				
+				// Get iframe for document preview.
+				updatePreviewFrame();
+				
+				// Copy bars code to clipboard.
+				navigator.clipboard.writeText(bars.join(""));
+			}
+			
+			function remove() // Remove progress bar from input criteria.
+			{
+				// Search input to remove.
+				let removeBar = document.getElementById("attrText").value;
+				let isFound = false;
+				
+				for(let i = 0 ; i < bars.length ; i++) // Find if there is string to remove.
+				{
+					isFound = titles[i] === removeBar;
+					if(isFound) // Remove if title found.
+					{
+						alert("Entry removed!");
+						bars[i] = ""; // Turn index to empty string.
+						titles[i] = ""; // Turn titles to empty string.
+						updatePreviewFrame();
+						break;
+					}
+				}
+				
+				if(!isFound) // Error entry not found!
+				{
+					alert("Entry to remove not found!");
+				}
+			}
+			
+			function reset() // Reset the arrays.
+			{
+				document.getElementById("previewWindow").contentWindow.document.write(""); // Clear preview window.
+				document.getElementById("attrText").value = ""; // Clear text boxes.
+				document.getElementById("attrValue").value = "";
+				window.location.reload(); // Refresh the page.
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Achievement Bar Creator</h1>
+		<p>Release: 8/28/2021<br><b>Requires Javascript</b><p>
+		<p>This website serves the purpose of providing an easy way to create one or more custom achievement bars that may be inserted into any webpage. Each achievement bar as an attribute name up to 50 characters in size and a positive integer value from 0 to 10. The preview window gives a live representation of what the output will be on the user's respective webpage. The three buttons: Submit, Remove, and Reset operate as follows:
+		<ul>
+			<li>Submit - Will append a new progress bar and copy all progress bar HTML data to the user's clipboard.</li>
+			<li>Remove - Will remove a progress bar of same name as entered in the attribute name and value inputs (is case sensitive).</li>
+			<li>Reset - Will reset the website for a fresh start.</li>
+		</ul></p>
+		
+		<label for="attrText">Attribute Name (50 characters max): </label>
+		<input id="attrText" type="text" maxlength="50" size="50">
+		<br>
+		
+		<label for="attrValue">Value (0-10): </label>
+		<input id="attrValue" type="number" min="0" max="10">
+		<br>
+		
+		<input id="SUBMIT" type="button" value="Submit" onClick="submit();"/>
+		<input id="REM" type="button" value="Remove" onClick="remove();"/>
+		<input id="RESET" type="button" value="Reset" onClick="reset();"/>
+		
+		<h2>Preview Window</h2>
+		<iframe id="previewWindow" height="200px" width="100%" title="Prevwindow"></iframe>
+	</body>
+</html>
